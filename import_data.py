@@ -1,5 +1,5 @@
 import mysql.connector as mysql
-import mysql.connector
+import mysql.connector 
 
 class ImportData():
     
@@ -25,11 +25,14 @@ class ImportData():
         self.__mysql_host        = "localhost"
         self.__mysql_port        = "3306"
         self.__mysql_db          = "venaudit"
-        self.__mysql_table       = "text_file_import"
+        self.__mysql_table       = "cars_listing"
         self.__mysql_user        = "root"
         self.__mysql_password    = ""
         self.__db_connection     = self.__get_db_connection()
         self.__column_names      = self.__get_column_names()
+        self.__create_table_schema()
+        # self.__load_data_file_to_db()
+
         print("Connection successfull")
     
     def __get_column_names(self):
@@ -53,7 +56,7 @@ class ImportData():
                 )
         return db_connection
     
-    def load_data_file_to_db(self):
+    def __load_data_file_to_db(self):
 
         print("Started importing data")
 
@@ -67,7 +70,48 @@ class ImportData():
         self.__db_connection.commit()
         self.__db_connection.close()
         print("Complete")
-    
-import_data = ImportData()
+
+    def __create_table_schema(self):
+        columns = ['id int NOT NULL',
+            'vin varchar(251) DEFAULT NULL',
+            'year int NOT NULL',
+            'make varchar(51) NOT NULL',
+            'model varchar(51) DEFAULT NULL',
+            'trim varchar(25) DEFAULT NULL',
+            'dealer_name varchar(101) DEFAULT NULL',
+            'dealer_street varchar(101) DEFAULT NULL',
+            'dealer_city varchar(101) DEFAULT NULL',
+            'dealer_state varchar(51) DEFAULT NULL',
+            'dealer_zip varchar(15) DEFAULT NULL',
+            'listing_price float DEFAULT NULL',
+            'listing_mileage int DEFAULT NULL',
+            'used int NOT NULL DEFAULT "0"',
+            'certified int NOT NULL DEFAULT "0"',
+            'style varchar(51) DEFAULT NULL',
+            'driven_wheels varchar(11) DEFAULT NULL',
+            'engine varchar(11) DEFAULT NULL',
+            'fuel_type varchar(11) DEFAULT NULL',
+            'exterior_color varchar(25) DEFAULT NULL',
+            'interior_color varchar(25) DEFAULT NULL',
+            'seller_website varchar(101) DEFAULT NULL',
+            'first_seen_date date DEFAULT NULL',
+            'last_seen_date date DEFAULT NULL',
+            'dealer_vdp_last_seen_date date DEFAULT NULL',
+            'listing_status int NOT NULL DEFAULT "0"',
+            'is_updated int NOT NULL DEFAULT "0"',
+            'created_at timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP'
+           ]
+        
+        cursor                          = self.__db_connection.cursor()
+        create_table_schema_sql         = 'CREATE TABLE IF NOT EXISTS '+self.__mysql_table+' (' + ', '.join(columns) + ' ) ENGINE=InnoDB DEFAULT CHARSET=latin1';
+        print(create_table_schema_sql)
+        add_primary_sql                 = 'ALTER TABLE '+self.__mysql_table+' ADD PRIMARY KEY (`id`)'
+        add_index_sql                   = 'ALTER TABLE '+self.__mysql_table+' ADD KEY `make` (`make`),  ADD KEY `model` (`model`)'
+        cursor.execute(create_table_schema_sql)
+        cursor.execute(add_primary_sql)                
+        cursor.execute(add_index_sql)
+
+
+ImportData()
  
-import_data.load_data_file_to_db()
+
