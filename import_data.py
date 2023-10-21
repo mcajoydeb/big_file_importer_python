@@ -18,7 +18,7 @@ class ImportData():
     __db_connection     = None           
 
     def __init__(self):
-        self.__data_file_name    = 'vin_data.txt'
+        self.__data_file_name    = 'test_table_data.txt'
         self.__delimiter         = '|'
         self.__newline           = '\n'
         self.__header            = True
@@ -30,10 +30,12 @@ class ImportData():
         self.__mysql_password    = ""
         self.__db_connection     = self.__get_db_connection()
         self.__column_names      = self.__get_column_names()
-        self.__create_table_schema()
-        # self.__load_data_file_to_db()
-
         print("Connection successfull")
+        self.__create_table_schema()
+        print( "Table "+self.__mysql_table + " created successfull")
+        self.__load_data_file_to_db()
+        print("Data imported")
+        
     
     def __get_column_names(self):
 
@@ -41,7 +43,7 @@ class ImportData():
         self.__header       = data_file.readline()
         data_file.close()
 
-        column_names = self.__header.split(self.__delimiter)
+        column_names        = self.__header.split(self.__delimiter)
         return column_names
 
     def __get_db_connection(self):
@@ -69,10 +71,10 @@ class ImportData():
         cursor.execute(load_statement)
         self.__db_connection.commit()
         self.__db_connection.close()
-        print("Complete")
+        print("Data import in progress")
 
     def __create_table_schema(self):
-        columns = ['id int NOT NULL',
+        columns = ['id int NOT NULL AUTO_INCREMENT',
             'vin varchar(251) DEFAULT NULL',
             'year int NOT NULL',
             'make varchar(51) NOT NULL',
@@ -103,15 +105,9 @@ class ImportData():
            ]
         
         cursor                          = self.__db_connection.cursor()
-        create_table_schema_sql         = 'CREATE TABLE IF NOT EXISTS '+self.__mysql_table+' (' + ', '.join(columns) + ' ) ENGINE=InnoDB DEFAULT CHARSET=latin1';
-        print(create_table_schema_sql)
-        add_primary_sql                 = 'ALTER TABLE '+self.__mysql_table+' ADD PRIMARY KEY (`id`)'
-        add_index_sql                   = 'ALTER TABLE '+self.__mysql_table+' ADD KEY `make` (`make`),  ADD KEY `model` (`model`)'
-        cursor.execute(create_table_schema_sql)
-        cursor.execute(add_primary_sql)                
-        cursor.execute(add_index_sql)
-
-
+        create_table_schema_sql         = 'CREATE TABLE IF NOT EXISTS '+self.__mysql_table+' (' + ', '.join(columns) + ', PRIMARY KEY (`id`),KEY make (`make`), KEY model (`model`) ) ENGINE=InnoDB DEFAULT CHARSET=latin1';               
+        cursor.execute(create_table_schema_sql)       
+   
 ImportData()
  
 
